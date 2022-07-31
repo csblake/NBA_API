@@ -10,6 +10,8 @@ import csv
 import pandas as pd
 import flask
 from flask import request, jsonify, render_template
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 def create_connection(db_file):
@@ -79,14 +81,18 @@ def make_database():
 
     cur = conn.cursor()
 
-    cur.executemany("REPLACE INTO NBAStats (rank,full_name,team,pos,age,gp,mpg,min_percentage,usg_percentage,to_percentage,fta,ft_percentage,two_point_attempts,two_point_percentage,three_point_attempts,three_point_percentage,eFG_percentage,ts_percentage,ppg,rpg,trb_percentage,apg,ast_percentage,spg,bpg,topg,vi,ortg,drtg) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", to_db)
+    cur.executemany("REPLACE INTO NBAStats (rank,full_name,team,pos,age,gp,mpg,min_percentage,usg_percentage,"
+                    "to_percentage,fta,ft_percentage,two_point_attempts,two_point_percentage,three_point_attempts,"
+                    "three_point_percentage,eFG_percentage,ts_percentage,ppg,rpg,trb_percentage,apg,ast_percentage,"
+                    "spg,bpg,topg,vi,ortg,drtg) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
+                    to_db)
 
     conn.commit()
     conn.close()
 
 
 def main():
-    make_database()
+    # make_database()
 
     app = flask.Flask(__name__)
     app.config["DEBUG"] = True
@@ -113,6 +119,88 @@ def main():
     @app.errorhandler(404)
     def page_not_found(e):
         return "<h1>404</h1><p>The resource could not be found.</p>", 404
+
+    @app.route('/api/v1/resources/stats', methods=['GET', 'POST'])
+    def api_filter_post():
+        if request.method == 'GET':
+            query_params = request.args
+
+            pos = query_params.get('pos')
+            full_name = query_params.get('full_name')
+            age = query_params.get('age')
+            mpg = query_params.get("MPG")
+            gp = query_params.get("GP")
+
+            query = "SELECT * FROM NBAStats WHERE"
+            to_filter = []
+
+            if pos:
+                query += ' pos=? AND'
+                to_filter.append(pos)
+            if full_name:
+                query += ' full_name=? AND'
+                to_filter.append(full_name)
+            if age:
+                query += ' age > ? AND'
+                to_filter.append(age)
+            if mpg:
+                query += ' MPG > ? AND'
+                to_filter.append(mpg)
+            if gp:
+                query += ' GP > ? AND'
+                to_filter.append(gp)
+            if not pos or age or mpg or gp or full_name:
+                return page_not_found(404)
+
+            query = query[:-4] + ';'
+
+            conn = sqlite3.connect('NBA_Player_Stats_202122.db')
+            conn.row_factory = dict_factory
+            cur = conn.cursor()
+
+            results = cur.execute(query, to_filter).fetchall()
+
+            return jsonify(results)
+        elif request.method == 'POST':
+            if request.headers['Content-Type'] == 'application/json':
+                data_to_write = request.get_json()
+                print(data_to_write)
+                conn = sqlite3.connect('NBA_Player_Stats_202122.db')
+                cur = conn.cursor()
+                cur.execute('INSERT INTO NBAStats VALUES(:rank,:full_name,:team,:pos,:age,:gp,:mpg,:min_percentage,'
+                            ':usg_percentage,:to_percentage,:fta,:ft_percentage,:two_point_attempts,'
+                            ':two_point_percentage,:three_point_attempts,:three_point_percentage,:eFG_percentage,'
+                            ':ts_percentage,:ppg,:rpg,:trb_percentage,:apg,:ast_percentage,:spg,:bpg,:topg,:vi,:ortg,'
+                            ':drtg)', data_to_write)
+                conn.commit()
+                conn.close()
+                return "Data added to database!"
+            else:
+                return '415 Unsupported Media Type'
+        else:
+            print("Something went really wrong. Check code.")
+            return
+
+    @app.route("/api/v1/resources/stats/dataframe", methods=["GET"])
+    def api_get_dataframe():
+        five_youngest = pd.read_csv("NBA_Stats_202122.csv")
+
+        five_youngest = five_youngest.sort_values(by=['AGE'], ascending=True)
+
+        five_youngest = five_youngest.head()
+
+        # return the dataframe to the user
+        return five_youngest.to_html()
+
+    @app.route("/api/v1/resources/stats/visual", methods=["GET"])
+    def api_get_visual():
+        df = pd.read_csv("NBA_Stats_202122.csv")
+
+        return df['POS'].value_counts().plot(kind='bar', title='Amount of Players Per Position')
+
+
+
+
 
     # this statement will start the app
     app.run(debug=True, use_reloader=False)

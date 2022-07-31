@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home Page for NBA Stats API</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+          box-sizing: border-box;
+          font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+          background-color: lightgray;
+        }
+
+        header {
+            border-bottom: 3px solid black;
+        }
+
+        .container {
+          width: 1024px;
+          margin: 0 auto;
+          padding: 15px;
+          border: 3px solid black;
+          border-radius: 15px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        li {
+            padding: 10px;
+            font-family: 'Roboto Condensed', sans-serif;
+            text-indent: 15px;
+            font-size: 20px;
+        }
+
+        p {
+            padding: 10px;
+            font-family: 'Roboto Condensed', sans-serif;
+            text-indent: 15px;
+            font-size: 20px;
+        }
+
+        header {
+          margin-bottom: 15px;
+        }
+
+        main {
+          width: 75%;
+          padding: 0 15px 15px 0;
+          float: left;
+        }
+
+        aside {
+          width: 25%;
+          float: left;
+          padding: 10px;
+        }
+
+        footer {
+          padding: 10px;
+          clear: both;
+        }
+
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+    <header>
+
+        <h1>NBA 2021-22 Season Stat API</h1>
+
+    </header>
+
+    <main>
+
+        <p>Hello! Welcome to the NBA Stats API for the 2021-22 Season! On this API you can get the stats from every player that played this season and compare utilize it in your program. You can either gather all of the players information or you can select specific players from the data that you want to get into your program.</p>
+
+    </main>
+
+    <aside>
+        <h3>Links to all of the pages:</h3>
+        <ul>
+            <li><a href="http://127.0.0.1:5000/api/v1/resources/stats/all">All Stats</a></li>
+            <li><a href="http://127.0.0.1:5000/api/v1/resources/stats/dataframe">Dataframe of Five Youngest Players</a></li>
+        </ul>
+
+    </aside>
+
+    <footer>
+
+        <p>&copy; CSBDESIGNS NBA API</p>
+
+    </footer>
+</div>
+</body>
+</html>
